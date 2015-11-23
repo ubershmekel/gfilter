@@ -1,21 +1,35 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>dc.js - Filtering Example</title>
+    <title>gfilter</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="./js/dc.css"/>
+    <link rel="stylesheet" type="text/css" href="./js/reset.css" />
+    <link rel="stylesheet" type="text/css" href="./js/dc.css" />
 </head>
+
 <body>
+    <h2>gfilter.js</h2> drop a csv file in the box:
+    <input type="file" id="dropFiles" />
 
-<!--div id="chart-ring-year"></div>
-<div id="chart-hist-spend"></div>
-<div id="chart-row-spenders"></div-->
+    <!--
+        gfilter credits
+        ------
+        Yuval Greenfield - gfilter author
+        http://d3js.org/ - a JavaScript library for visualizing data with HTML, SVG, and CSS.
+        http://square.github.io/crossfilter/ - a JavaScript library for exploring large multivariate datasets in the browser.
+        https://dc-js.github.io/dc.js/ - a javascript charting library with native crossfilter support.
+        http://dc-js.github.io/dc.js/examples/filtering.html - the example gfilter is based off of.
+        http://meyerweb.com/eric/tools/css/reset/ - css reset.
+        https://github.com/shawnbot/drag-n-data - drag and drop file parsing for d3js. 
+    -->
 
-<script type="text/javascript" src="./js/d3.js"></script>
-<script type="text/javascript" src="./js/crossfilter.js"></script>
-<script type="text/javascript" src="./js/dc.js"></script>
-<script type="text/javascript" src="./js/main.js"></script>
+    <script type="text/javascript" src="./js/d3.js"></script>
+    <script type="text/javascript" src="./js/crossfilter.js"></script>
+    <script type="text/javascript" src="./js/dc.js"></script>
+    <script type="text/javascript" src="./js/dnd.js"></script>
+    <script type="text/javascript" src="./js/main.js"></script>
 
 </body>
+
 </html>

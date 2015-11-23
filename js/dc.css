@@ -324,3 +324,20 @@ g.dc-legend-item.fadeout {
     pointer-events: all;
     cursor: pointer;
 }
+
+/**********************************
+d3js + crossfire + dc = gfilter
+***********************************/
+
+#dropFiles {
+    border: 2px dashed #bbb;
+    padding: 5px;
+    margin: 5px;
+}
+
+h2 {
+    display: inline;
+    margin: 5px;
+    font-weight: bold;
+    font-size: 1.5em;
+}
