@@ -1,6 +1,9 @@
 # gfilter
 A cross filter dashboard that can handle any csv you throw at it.
 
+# Demo
+http://ubershmekel.github.io/gfilter/
+
 # Credits
 * http://d3js.org/ - a JavaScript library for visualizing data with HTML, SVG, and CSS.
 * http://square.github.io/crossfilter/ - a JavaScript library for exploring large multivariate datasets in the browser.
