@@ -335,9 +335,21 @@ d3js + crossfire + dc = gfilter
     margin: 5px;
 }
 
-h2 {
-    display: inline;
+#logo {
+    display: inline-block;
     margin: 5px;
     font-weight: bold;
     font-size: 1.5em;
+    text-decoration: none;
+    color: #000;
 }
+
+#logo:hover {
+    color: #e54;
+}
+
+
+.chartTitle {
+    text-align: center;
+}
+
