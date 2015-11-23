@@ -329,7 +329,7 @@ g.dc-legend-item.fadeout {
 d3js + crossfire + dc = gfilter
 ***********************************/
 
-#dropFiles {
+#gfilterDropFiles {
     border: 2px dashed #bbb;
     padding: 5px;
     margin: 5px;
