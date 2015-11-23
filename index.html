@@ -6,23 +6,19 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="./assets/reset.css" />
     <link rel="stylesheet" type="text/css" href="./assets/gfilter.css" />
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-4533496-20', 'auto');
+        ga('send', 'pageview');
+    </script>
 </head>
 
 <body>
     <h2>gfilter.js</h2> drop a csv file in the box:
     <input type="file" id="dropFiles" />
-
-    <!--
-        gfilter credits
-        ------
-        Yuval Greenfield - gfilter author
-        http://d3js.org/ - a JavaScript library for visualizing data with HTML, SVG, and CSS.
-        http://square.github.io/crossfilter/ - a JavaScript library for exploring large multivariate datasets in the browser.
-        https://dc-js.github.io/dc.js/ - a javascript charting library with native crossfilter support.
-        http://dc-js.github.io/dc.js/examples/filtering.html - the example gfilter is based off of.
-        http://meyerweb.com/eric/tools/css/reset/ - css reset.
-        https://github.com/shawnbot/drag-n-data - drag and drop file parsing for d3js. 
-    -->
 
     <script type="text/javascript" src="./assets/d3.js"></script>
     <script type="text/javascript" src="./assets/crossfilter.js"></script>
