@@ -56,31 +56,31 @@ gfilter.init = function (data, rootElement) {
         if (isNumeric(data[0][propName])) {
             var theChart = dc.barChart("#" + chartId);
 
-            //var spendPerName = dim.group().reduceSum(function(d) {return d[propName];});
-            var spendPerName = dim.group().reduceCount();
+            var countGroup = dim.group().reduceCount();
             var minMax = d3.extent(data, function (d) { return +d[propName] });
             var min = +minMax[0];
             var max = +minMax[1];
             theChart
-                .xAxisLabel(propName)
+                //Can't use xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
                 .width(gfilter.width).height(gfilter.height)
                 .dimension(dim)
-                .group(spendPerName)
+                .group(countGroup)
                 .x(d3.scale.linear().domain([min, max]))
                 .elasticY(true);
             theChart.yAxis().ticks(2);
+            addText(propName, chartDiv, "chartTitle");
         } else {
             var uniques = d3.map(data, function (d) { return d[propName] });
             // arbitrary amount that looks ok on the rowChart
-            if (uniques.size() < 21) {
-                var group = dim.group().reduceSum(function (d) { return d[propName]; });
+            if (1 < uniques.size() && uniques.size() < 21) {
+                var group = dim.group().reduceCount();
                 var theChart = dc.rowChart("#" + chartId);
                 theChart
                     .width(gfilter.width).height(gfilter.height)
                     .dimension(dim)
                     .group(group)
                     .elasticX(true);
-                addText(propName, chartDiv, "chartTitle")
+                addText(propName, chartDiv, "chartTitle");
             } else {
                 failedColumns.push(propName);
             }
