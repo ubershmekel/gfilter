@@ -98,7 +98,9 @@ gfilter.init = function (data, rootElement) {
     // Drag and drop file handling
     // To avoid this from happening - don't have an element with the id "gfilterDropFiles"
     ////////////////////////////////////////////////////////////////////////////
-    var dropper = d3.select("#gfilterDropFiles")
+    var dropperSelect = d3.select("#gfilterDropFiles");
+    var isDefaultSetup = dropperSelect.length == 1;
+    var dropper = dropperSelect
         .call(dnd.dropper()
             .on("dragover", function () {
                 dropper.classed("active", true);
@@ -110,6 +112,29 @@ gfilter.init = function (data, rootElement) {
                 var dataArray = files[0].data;
                 gfilter(dataArray, document.body);
             }));
+
+    function getParameters() {
+        var prmstr = window.location.search.substr(1);
+        return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+    }
+    
+    function transformToAssocArray( prmstr ) {
+        var params = {};
+        var prmarr = prmstr.split("&");
+        for ( var i = 0; i < prmarr.length; i++) {
+            var tmparr = prmarr[i].split("=");
+            params[tmparr[0]] = tmparr[1];
+        }
+        return params;
+    }
+    
+    var params = getParameters();
+    if(isDefaultSetup && params['dl']) {
+        d3.csv(params['dl'], function(rows) {
+            gfilter(rows, document.body);
+        });
+    }
+
 })();
 
 
