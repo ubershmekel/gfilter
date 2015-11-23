@@ -11,3 +11,7 @@ http://ubershmekel.github.io/gfilter/
 * http://dc-js.github.io/dc.js/examples/filtering.html - the example gfilter is based off of.
 * http://meyerweb.com/eric/tools/css/reset/ - css reset.
 * https://github.com/shawnbot/drag-n-data - drag and drop file parsing for d3js. 
+
+# License
+
+* [MIT License](http://www.opensource.org/licenses/MIT)
