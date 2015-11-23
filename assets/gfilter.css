@@ -348,8 +348,10 @@ d3js + crossfire + dc = gfilter
     color: #e54;
 }
 
-
 .chartTitle {
     text-align: center;
 }
 
+.dc-chart {
+    border: 1px solid #666;
+}
