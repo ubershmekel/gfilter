@@ -67,8 +67,81 @@ gfilter.init = function (data, rootElement) {
     var params = Object.keys(data[0]);
     var ndx = crossfilter(data);
     gfilter.crossfilter = ndx;
+    gfilter.dimensions = {};
 
     var failedColumns = [];
+
+    var createHistogram = function (propName) {
+        addText(propName, chartDiv, "chartTitle");
+        var barChart = dc.barChart("#" + chartId);
+
+        var numericValue = function (d) {
+            if (d[propName] === "")
+                return NaN;
+            else
+                return +d[propName];
+        };
+        var minMax = d3.extent(data, numericValue);
+        var min = minMax[0];
+        var max = minMax[1];
+        numericValue = function (d) {
+            if (d[propName] === "")
+                // I want to return NaN here but that appears for some reason in a middle bar
+                // so this way I ensure it's outside of the domain of any chart.
+                return min - max;
+            else
+                return +d[propName];
+        };
+        var dimNumeric = ndx.dimension(numericValue);
+        gfilter.dimensions[propName] = dimNumeric;
+        var countGroup;
+        var lastBarSize = 0;
+        if (uniques.size() < 10) {
+            // Do not do 30 bins when you only have 10 distinct values.
+            // I'm not sure if this is the right thing to do. 
+            countGroup = dimNumeric.group().reduceCount();
+        } else {
+            // avoid very thin lines and a barcode-like histogram
+            var barCount = 30;
+            var span = max - min;
+            lastBarSize = span / barCount;
+            var roundToHistogramBar = function (d) {
+                if (isNaN(d) || d === "")
+                    d = NaN;
+                if (d == max)
+                    // This fix avoids the max value always being in its own bin (max).
+                    // I should figure out how to make the grouping equation better and avoid this hack. 
+                    d = max - lastBarSize;
+                var res = min + span * Math.floor(barCount * (d - min) / span) / barCount;
+                return res;
+            };
+            countGroup = dimNumeric.group(roundToHistogramBar);
+            gfilter.group = countGroup;
+            barChart.xUnits(function () { return barCount; });
+        }
+
+        //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
+        barChart
+            .width(gfilter.width).height(gfilter.height)
+            .dimension(dimNumeric)
+            .group(countGroup)
+            .x(d3.scale.linear().domain([min - lastBarSize, max + lastBarSize]).rangeRound([0, 500]))
+        //.x(d3.scale.linear().range([100, 0]))
+            .elasticY(true);
+        barChart.yAxis().ticks(2);
+    }
+
+    var createRowChart = function (propName) {
+        addText(propName, chartDiv, "chartTitle");
+        var dim = ndx.dimension(function (d) { return d[propName]; });
+        var group = dim.group().reduceCount();
+        var rowChart = dc.rowChart("#" + chartId);
+        rowChart
+            .width(gfilter.width).height(gfilter.height)
+            .dimension(dim)
+            .group(group)
+            .elasticX(true);
+    }
 
     for (var i = 0; i < params.length; i++) {
         var propName = params[i];
@@ -76,49 +149,22 @@ gfilter.init = function (data, rootElement) {
         var chartDiv = addDiv(chartId);
 
         var uniques = d3.map(data, function (d) { return d[propName] });
-        if (isNumeric(data[0][propName])) {
-            addText(propName, chartDiv, "chartTitle");
-            var barChart = dc.barChart("#" + chartId);
-
-            var minMax = d3.extent(data, function (d) { return +d[propName] });
-            var min = +minMax[0];
-            var max = +minMax[1];
-            var dimNumeric = ndx.dimension(function (d) { return +d[propName]; });
-            var countGroup;
-            if(uniques.size() < 10) {
-                countGroup = dimNumeric.group().reduceCount();
-            } else {
-                // avoid very thin lines and a barcode-like histogram
-                var sections = 30;
-                var span = max - min;
-                countGroup = dimNumeric.group(function (d) { return min + span * Math.floor(sections * (d - min) / span) / sections; });
-                barChart.xUnits(function(){return sections;});
-            }
-
-            //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
-            barChart
-                .width(gfilter.width).height(gfilter.height)
-                .dimension(dimNumeric)
-                .group(countGroup)
-                .x(d3.scale.linear().domain([min, max]).rangeRound([0, 500]))
-                //.x(d3.scale.linear().range([100, 0]))
-                .elasticY(true);
-            barChart.yAxis().ticks(2);
-        } else {
+        var uniqueCount = uniques.size();
+        if (uniqueCount < 2) {
+            // Just one value is not interesting to visualize 
+            failedColumns.push(propName);
+            continue;
+        } else if (uniqueCount < 6) {
+            // arbitrary amount that feels better to click on than to drag filter
+            createRowChart(propName);
+        } else if (isNumeric(data[0][propName])) {
+            // Numerical data is shown in histograms
+            createHistogram(propName);
+        } else if (uniqueCount < 21) {
             // arbitrary amount that looks ok on the rowChart
-            if (1 < uniques.size() && uniques.size() < 21) {
-                addText(propName, chartDiv, "chartTitle");
-                var dim = ndx.dimension(function (d) { return d[propName]; });
-                var group = dim.group().reduceCount();
-                var rowChart = dc.rowChart("#" + chartId);
-                rowChart
-                    .width(gfilter.width).height(gfilter.height)
-                    .dimension(dim)
-                    .group(group)
-                    .elasticX(true);
-            } else {
-                failedColumns.push(propName);
-            }
+            createRowChart(propName);
+        } else {
+            failedColumns.push(propName);
         }
     }
 

@@ -4,6 +4,15 @@ A cross filter dashboard that can handle any csv you throw at it.
 # Demo
 https://ubershmekel.github.io/gfilter/
 
+# Example Data
+
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/TechCrunchcontinentalUSA.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/spent.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/other.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/flights-3m.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/Sacramentorealestatetransactions.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/SacramentocrimeJanuary2006.csv
+
 # Credits
 * https://d3js.org/ - a JavaScript library for visualizing data with HTML, SVG, and CSS.
 * https://square.github.io/crossfilter/ - a JavaScript library for exploring large multivariate datasets in the browser.
