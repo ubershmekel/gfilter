@@ -355,3 +355,25 @@ d3js + crossfire + dc = gfilter
 .dc-chart {
     border: 1px solid #666;
 }
+
+
+/**********************************
+Tables
+***********************************/
+.table th {
+    font-weight: bold;
+    background-color: #d9edf7;
+}
+
+.table th, .table td {
+    padding: 8px;
+    line-height: 20px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #DDD;
+}
+
+.table tbody tr:hover td, .table tbody tr:hover th {
+    background-color: #eee;
+}
+

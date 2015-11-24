@@ -6,7 +6,7 @@ var gfilter = function (data, rootElement) {
 };
 
 gfilter.className = "gfilter";
-gfilter.width = 500;
+gfilter.width = 470;
 gfilter.height = 300;
 
 gfilter.removeAll = function () {
@@ -38,6 +38,28 @@ gfilter.init = function (data, rootElement) {
         line.className = cls;
         line.appendChild(textNode);
         parentDiv.appendChild(line);
+    }
+    
+    var createDataWidget = function() {
+        var dataTableId = "dataTable";
+        var tableDiv = addDiv(dataTableId);
+        d3.select(tableDiv).classed("table", true);
+        var table = dc.dataTable("#" + dataTableId);
+        //var table = dc.dataTable(".dc-data-table");
+        var getFirstParam = function (d) {
+            return d[params[0]];
+        };
+        var tableDim = ndx.dimension(getFirstParam);
+        
+        table
+            .width(800)
+            .height(600)
+            .dimension(tableDim)
+            .group(getFirstParam)
+            .showGroups(false)
+            .size(10)
+            .columns(params)
+
     }
 
     var complaintsDiv = addDiv("complaints");
@@ -86,6 +108,8 @@ gfilter.init = function (data, rootElement) {
             }
         }
     }
+    
+    createDataWidget();
 
     if (failedColumns.length > 0)
         addText("Did not create chart for the columns: " + failedColumns.join(", "), complaintsDiv, "complaint");
@@ -136,5 +160,4 @@ gfilter.init = function (data, rootElement) {
     }
 
 })();
-
 
