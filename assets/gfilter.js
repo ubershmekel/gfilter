@@ -1,4 +1,5 @@
 /* global dc */
+/* global dnd */
 /* global crossfilter */
 var gfilter = function (data, rootElement) {
     gfilter.removeAll();
@@ -39,8 +40,8 @@ gfilter.init = function (data, rootElement) {
         line.appendChild(textNode);
         parentDiv.appendChild(line);
     }
-    
-    var createDataWidget = function() {
+
+    var createDataWidget = function () {
         var dataTableId = "dataTable";
         var tableDiv = addDiv(dataTableId);
         d3.select(tableDiv).classed("table", true);
@@ -50,7 +51,7 @@ gfilter.init = function (data, rootElement) {
             return d[params[0]];
         };
         var tableDim = ndx.dimension(getFirstParam);
-        
+
         table
             .width(800)
             .height(600)
@@ -73,42 +74,54 @@ gfilter.init = function (data, rootElement) {
         var propName = params[i];
         var chartId = "chart-hist-" + propName;
         var chartDiv = addDiv(chartId);
-        var dim = ndx.dimension(function (d) { return d[propName]; });
 
+        var uniques = d3.map(data, function (d) { return d[propName] });
         if (isNumeric(data[0][propName])) {
-            var theChart = dc.barChart("#" + chartId);
+            addText(propName, chartDiv, "chartTitle");
+            var barChart = dc.barChart("#" + chartId);
 
-            var countGroup = dim.group().reduceCount();
             var minMax = d3.extent(data, function (d) { return +d[propName] });
             var min = +minMax[0];
             var max = +minMax[1];
-            theChart
-                //Can't use xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
+            var dimNumeric = ndx.dimension(function (d) { return +d[propName]; });
+            var countGroup;
+            if(uniques.size() < 10) {
+                countGroup = dimNumeric.group().reduceCount();
+            } else {
+                // avoid very thin lines and a barcode-like histogram
+                var sections = 30;
+                var span = max - min;
+                countGroup = dimNumeric.group(function (d) { return min + span * Math.floor(sections * (d - min) / span) / sections; });
+                barChart.xUnits(function(){return sections;});
+            }
+
+            //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
+            barChart
                 .width(gfilter.width).height(gfilter.height)
-                .dimension(dim)
+                .dimension(dimNumeric)
                 .group(countGroup)
-                .x(d3.scale.linear().domain([min, max]))
+                .x(d3.scale.linear().domain([min, max]).rangeRound([0, 500]))
+                //.x(d3.scale.linear().range([100, 0]))
                 .elasticY(true);
-            theChart.yAxis().ticks(2);
-            addText(propName, chartDiv, "chartTitle");
+            barChart.yAxis().ticks(2);
         } else {
-            var uniques = d3.map(data, function (d) { return d[propName] });
             // arbitrary amount that looks ok on the rowChart
             if (1 < uniques.size() && uniques.size() < 21) {
+                addText(propName, chartDiv, "chartTitle");
+                var dim = ndx.dimension(function (d) { return d[propName]; });
                 var group = dim.group().reduceCount();
-                var theChart = dc.rowChart("#" + chartId);
-                theChart
+                var rowChart = dc.rowChart("#" + chartId);
+                rowChart
                     .width(gfilter.width).height(gfilter.height)
                     .dimension(dim)
                     .group(group)
                     .elasticX(true);
-                addText(propName, chartDiv, "chartTitle");
             } else {
                 failedColumns.push(propName);
             }
         }
     }
-    
+
     createDataWidget();
 
     if (failedColumns.length > 0)
@@ -141,20 +154,20 @@ gfilter.init = function (data, rootElement) {
         var prmstr = window.location.search.substr(1);
         return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
     }
-    
-    function transformToAssocArray( prmstr ) {
+
+    function transformToAssocArray(prmstr) {
         var params = {};
         var prmarr = prmstr.split("&");
-        for ( var i = 0; i < prmarr.length; i++) {
+        for (var i = 0; i < prmarr.length; i++) {
             var tmparr = prmarr[i].split("=");
             params[tmparr[0]] = tmparr[1];
         }
         return params;
     }
-    
+
     var params = getParameters();
-    if(isDefaultSetup && params['dl']) {
-        d3.csv(params['dl'], function(rows) {
+    if (isDefaultSetup && params['dl']) {
+        d3.csv(params['dl'], function (rows) {
             gfilter(rows, document.body);
         });
     }
