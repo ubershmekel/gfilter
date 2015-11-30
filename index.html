@@ -19,13 +19,20 @@
 
 <body>
     <div id="header">
-        <a id="logo" href="https://github.com/ubershmekel/gfilter">gfilter.js</a> drop a csv file in the box:
-        <input type="file" id="gfilterDropFiles" /> See examples:
-        <a href="https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/TechCrunchcontinentalUSA.csv">TechCrunch Investments</a>
-        <a href="https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/spent.csv">Expenses</a>
-        <a href="https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/flights-3m.csv">Flights</a>
-        <a href="https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/Sacramentorealestatetransactions.csv">RealEstate</a>
+        <a class="logo" href="https://github.com/ubershmekel/gfilter">gfilter.js</a>
+        <span class="logo" id="fileName"></span>
+        
+        Drop a csv file on this page <input type="file" id="gfilterDropFiles" /> or check out an example:
+        
+        <a href="https://ubershmekel.github.io/gfilter/?dl=csvData/TechCrunchcontinentalUSA.csv">TechCrunch Investments</a>
+        <a href="https://ubershmekel.github.io/gfilter/?dl=csvData/spent.csv">Expenses</a>
+        <a href="https://ubershmekel.github.io/gfilter/?dl=csvData/flights-3m.csv">Flights</a>
+        <a href="https://ubershmekel.github.io/gfilter/?dl=csvData/Sacramentorealestatetransactions.csv">RealEstate</a>
 
+    </div>
+
+    <div id="dropzone">
+        <div id="textnode">Drop anywhere!</div>
     </div>
 
     <script type="text/javascript" src="./assets/d3.js"></script>
@@ -33,7 +40,7 @@
     <script type="text/javascript" src="./assets/dc.js"></script>
     <script type="text/javascript" src="./assets/dnd.js"></script>
     <script type="text/javascript" src="./assets/gfilter.js"></script>
-
+    
 </body>
 
 </html>

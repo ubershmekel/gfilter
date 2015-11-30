@@ -84,6 +84,7 @@ gfilter.init = function (data, rootElement) {
         var minMax = d3.extent(data, numericValue);
         var min = minMax[0];
         var max = minMax[1];
+        var span = max - min;
         numericValue = function (d) {
             if (d[propName] === "")
                 // I want to return NaN here but that appears for some reason in a middle bar
@@ -96,29 +97,28 @@ gfilter.init = function (data, rootElement) {
         gfilter.dimensions[propName] = dimNumeric;
         var countGroup;
         var lastBarSize = 0;
-        if (uniques.size() < 10) {
+        var barCount = 30;
+        if (5 < span && span < 60) {
             // Do not do 30 bins when you only have 10 distinct values.
             // I'm not sure if this is the right thing to do. 
-            countGroup = dimNumeric.group().reduceCount();
-        } else {
-            // avoid very thin lines and a barcode-like histogram
-            var barCount = 30;
-            var span = max - min;
-            lastBarSize = span / barCount;
-            var roundToHistogramBar = function (d) {
-                if (isNaN(d) || d === "")
-                    d = NaN;
-                if (d == max)
-                    // This fix avoids the max value always being in its own bin (max).
-                    // I should figure out how to make the grouping equation better and avoid this hack. 
-                    d = max - lastBarSize;
-                var res = min + span * Math.floor(barCount * (d - min) / span) / barCount;
-                return res;
-            };
-            countGroup = dimNumeric.group(roundToHistogramBar);
-            gfilter.group = countGroup;
-            barChart.xUnits(function () { return barCount; });
+            //barCount = Math.ceil(span);
         }
+        
+        // avoid very thin lines and a barcode-like histogram
+        lastBarSize = span / barCount;
+        var roundToHistogramBar = function (d) {
+            if (isNaN(d) || d === "")
+                d = NaN;
+            if (d == max)
+                // This fix avoids the max value always being in its own bin (max).
+                // I should figure out how to make the grouping equation better and avoid this hack. 
+                d = max - lastBarSize;
+            var res = min + span * Math.floor(barCount * (d - min) / span) / barCount;
+            return res;
+        };
+        countGroup = dimNumeric.group(roundToHistogramBar);
+        gfilter.group = countGroup;
+        barChart.xUnits(function () { return barCount; });
 
         //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
         barChart
@@ -181,20 +181,45 @@ gfilter.init = function (data, rootElement) {
     // Drag and drop file handling
     // To avoid this from happening - don't have an element with the id "gfilterDropFiles"
     ////////////////////////////////////////////////////////////////////////////
-    var dropperSelect = d3.select("#gfilterDropFiles");
+    var dropperFileInput = d3.select("#gfilterDropFiles");
+    var dropperSelect = d3.select(window);
+    var dropperViz = d3.select("#dropzone");
     var isDefaultSetup = dropperSelect.length == 1;
+    var uiUpdateTitle = function(title) {
+        d3.select("#fileName").text(" - " + title);
+    }
+    var uiFileHover = function() {
+        dropperViz.classed("active", true);
+    };
+    var uiEndFileHover = function() {
+        dropperViz.classed("active", false);
+    };
+    var readFiles = function (files) {
+        var dataArray = files[0].data;
+        uiUpdateTitle(files[0].name);
+        gfilter(dataArray, document.body);
+    };
     var dropper = dropperSelect
         .call(dnd.dropper()
-            .on("dragover", function () {
-                dropper.classed("active", true);
-            })
-            .on("drop", function () {
-                dropper.classed("active", false);
-            })
-            .on("read", function (files) {
-                var dataArray = files[0].data;
-                gfilter(dataArray, document.body);
-            }));
+            .on("dragover", uiFileHover)
+            .on("drop", uiEndFileHover)
+            .on("read", readFiles)
+            );
+    
+    dropperFileInput.on("change", function() {
+        var file = this.files[0];
+        dnd.read(file, function(error, data) {
+            file.data = data;
+            readFiles([file]);
+        });
+    });
+    
+    window.addEventListener("dragleave", function (e) {
+        dropperViz.classed("active", false);
+    });
+
+
+
 
     function getParameters() {
         var prmstr = window.location.search.substr(1);
