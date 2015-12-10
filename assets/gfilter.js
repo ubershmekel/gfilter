@@ -60,8 +60,14 @@ gfilter.init = function (data, rootElement) {
             .showGroups(false)
             .size(10)
             .columns(params)
-
-    }
+    };
+    
+    var isNumericArray = function(seq) {
+        for(var i = 0; i < seq.length; i++) {
+            if(isNumeric(seq[i]))
+                return true;
+        }
+    };
 
     var complaintsDiv = addDiv("complaints");
     var params = Object.keys(data[0]);
@@ -157,7 +163,8 @@ gfilter.init = function (data, rootElement) {
         } else if (uniqueCount < 6) {
             // arbitrary amount that feels better to click on than to drag filter
             createRowChart(propName);
-        } else if (isNumeric(data[0][propName])) {
+        //} else if (isNumeric(data[0][propName])) {
+        } else if (isNumericArray(uniques.keys())) {
             // Numerical data is shown in histograms
             createHistogram(propName);
         } else if (uniqueCount < 21) {
