@@ -76,6 +76,20 @@ gfilter.init = function (data, rootElement) {
     gfilter.dimensions = {};
 
     var failedColumns = [];
+    
+    var createRowCounter = function() {
+        var rowCounterId = 'rowCounter'
+        addDiv(rowCounterId);
+        var rowCounter = dc.dataCount('#' + rowCounterId);
+        rowCounter
+            .dimension(ndx)
+            .group(ndx.groupAll())
+            .html({
+                some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+                    ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'\'>Reset All</a>',
+                all: 'All <strong>%total-count</strong> records shown. Click on the graphs to apply filters.'
+        });;
+    }
 
     var createHistogram = function (propName) {
         addText(propName, chartDiv, "chartTitle");
@@ -175,6 +189,7 @@ gfilter.init = function (data, rootElement) {
         }
     }
 
+    createRowCounter();
     createDataWidget();
 
     if (failedColumns.length > 0)
