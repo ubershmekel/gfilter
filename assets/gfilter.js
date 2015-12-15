@@ -24,6 +24,15 @@ gfilter.init = function (data, rootElement) {
     var isNumeric = function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
+    
+    var parseDate = function(obj) {
+        var iso = d3.time.format.utc("%Y-%m-%dT%H:%M:%S");
+        return iso.parse(obj);
+    };
+    
+    var isDate = function(obj) {
+        return parseDate(obj) != null;
+    };
 
     var addDiv = function (id) {
         var div = document.createElement("div");
@@ -91,10 +100,50 @@ gfilter.init = function (data, rootElement) {
         });;
     }
 
+    var createDateHistogram = function (propName) {
+        addText(propName, chartDiv, "chartTitle");
+        data.forEach(function (d) {
+            d[propName] = parseDate(d[propName]);
+        });
+        var valueFunc = function(d) {
+            return d[propName];
+        };
+        var minMax = d3.extent(data, valueFunc);
+        var min = minMax[0];
+        var max = minMax[1];
+        var span = max - min;
+
+        var lastBarSize = 0;
+        var barCount = 30;
+
+        // avoid very thin lines and a barcode-like histogram
+        lastBarSize = span / barCount;
+        var roundToHistogramBar = function (d) {
+            if (isNaN(d) || d === "")
+                d = NaN;
+            if (d == max)
+                // This fix avoids the max value always being in its own bin (max).
+                // I should figure out how to make the grouping equation better and avoid this hack. 
+                d = max - lastBarSize;
+            var res = new Date(min.getTime() + span * Math.floor(barCount * (d - min) / span) / barCount);
+            return res;
+        };
+
+        var dimDate = ndx.dimension(valueFunc);
+        var barChart = dc.barChart("#" + chartId);
+        barChart
+            .width(gfilter.width).height(gfilter.height)
+            .dimension(dimDate)
+            .group(dimDate.group(roundToHistogramBar))
+            //.group(dimDate.group().reduceCount())
+            .x(d3.time.scale.utc().domain([min, max]))
+            .elasticY(true)
+            .yAxis().ticks(2);
+        barChart.xUnits(function () { return barCount; })
+    };
+        
     var createHistogram = function (propName) {
         addText(propName, chartDiv, "chartTitle");
-        var barChart = dc.barChart("#" + chartId);
-
         var numericValue = function (d) {
             if (d[propName] === "")
                 return NaN;
@@ -138,6 +187,7 @@ gfilter.init = function (data, rootElement) {
         };
         countGroup = dimNumeric.group(roundToHistogramBar);
         gfilter.group = countGroup;
+        var barChart = dc.barChart("#" + chartId);
         barChart.xUnits(function () { return barCount; });
 
         //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
@@ -184,6 +234,8 @@ gfilter.init = function (data, rootElement) {
         } else if (uniqueCount < 21) {
             // arbitrary amount that looks ok on the rowChart
             createRowChart(propName);
+        } else if (isDate(data[0][propName])) {
+            createDateHistogram(propName);
         } else {
             failedColumns.push(propName);
         }
@@ -198,72 +250,4 @@ gfilter.init = function (data, rootElement) {
     dc.renderAll();
 };
 
-(function () {
-    ////////////////////////////////////////////////////////////////////////////
-    // Drag and drop file handling
-    // To avoid this from happening - don't have an element with the id "gfilterDropFiles"
-    ////////////////////////////////////////////////////////////////////////////
-    var dropperFileInput = d3.select("#gfilterDropFiles");
-    var dropperSelect = d3.select(window);
-    var dropperViz = d3.select("#dropzone");
-    var isDefaultSetup = dropperSelect.length == 1;
-    var uiUpdateTitle = function(title) {
-        d3.select("#fileName").text(" - " + title);
-    }
-    var uiFileHover = function() {
-        dropperViz.classed("active", true);
-    };
-    var uiEndFileHover = function() {
-        dropperViz.classed("active", false);
-    };
-    var readFiles = function (files) {
-        var dataArray = files[0].data;
-        uiUpdateTitle(files[0].name);
-        gfilter(dataArray, document.body);
-    };
-    var dropper = dropperSelect
-        .call(dnd.dropper()
-            .on("dragover", uiFileHover)
-            .on("drop", uiEndFileHover)
-            .on("read", readFiles)
-            );
-    
-    dropperFileInput.on("change", function() {
-        var file = this.files[0];
-        dnd.read(file, function(error, data) {
-            file.data = data;
-            readFiles([file]);
-        });
-    });
-    
-    window.addEventListener("dragleave", function (e) {
-        dropperViz.classed("active", false);
-    });
-
-
-
-
-    function getParameters() {
-        var prmstr = window.location.search.substr(1);
-        return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
-    }
-
-    function transformToAssocArray(prmstr) {
-        var params = {};
-        var prmarr = prmstr.split("&");
-        for (var i = 0; i < prmarr.length; i++) {
-            var tmparr = prmarr[i].split("=");
-            params[tmparr[0]] = tmparr[1];
-        }
-        return params;
-    }
-
-    var params = getParameters();
-    if (isDefaultSetup && params['dl']) {
-        d3.csv(params['dl'], function (rows) {
-            gfilter(rows, document.body);
-        });
-    }
-
-})();
 
