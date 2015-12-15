@@ -398,3 +398,8 @@ Tables
     opacity: 1;
     visibility: visible;    
 }
+
+#rowCounter {
+    width: 470px;
+    padding: 5px;
+}
