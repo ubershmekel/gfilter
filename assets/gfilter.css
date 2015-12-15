@@ -222,7 +222,7 @@ div.dc-chart {
 }
 
 .dc-chart g.row text {
-    fill: white;
+    fill: #000;
     font-size: 12px;
     cursor: pointer;
 }
