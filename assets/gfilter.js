@@ -85,19 +85,28 @@ gfilter.init = function (data, rootElement) {
     gfilter.dimensions = {};
 
     var failedColumns = [];
-    
     var createRowCounter = function() {
+        var humanize = function(x) {
+            // http://stackoverflow.com/questions/661562/how-to-format-a-float-in-javascript/29249277#29249277
+            return x.toPrecision(2).replace(/\.?0*$/,'');
+        }
+    
         var rowCounterId = 'rowCounter'
         addDiv(rowCounterId);
-        var rowCounter = dc.dataCount('#' + rowCounterId);
+        var rowCounter = dc.numberDisplay ('#' + rowCounterId);
         rowCounter
             .dimension(ndx)
             .group(ndx.groupAll())
-            .html({
-                some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                    ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'\'>Reset All</a>',
-                all: 'All <strong>%total-count</strong> records shown. Click on the graphs to apply filters.'
-        });;
+            .formatNumber(function() {
+                var selectedCount = rowCounter.group().value();
+                var total = rowCounter.dimension().size();
+                if(selectedCount == total) {
+                    return 'All <strong>' + total + '</strong> records shown. Click on the graphs to apply filters.'
+                }
+                var resetButton = '<a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>';
+                var percent = humanize(100 * selectedCount / total);
+                return 'Selected ' + percent + '% (' + selectedCount + ' out of ' + total + ' records) | ' + resetButton;
+        });
     }
 
     var createDateHistogram = function (propName) {

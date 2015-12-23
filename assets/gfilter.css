@@ -403,3 +403,7 @@ Tables
     width: 470px;
     padding: 5px;
 }
+
+strong {
+    font-weight: bold;
+}
