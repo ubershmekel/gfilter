@@ -20,6 +20,13 @@ gfilter.addData = function (data) {
     dc.redrawAll();
 };
 
+gfilter.humanizePercent = function(x) {
+    // http://stackoverflow.com/questions/661562/how-to-format-a-float-in-javascript/29249277#29249277
+    // For displaying percents to humans this should behave like so:
+    return x.toFixed(2).replace(/\.?0*$/,'');
+}
+
+
 gfilter.init = function (data, rootElement) {
     var isNumeric = function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
@@ -86,10 +93,6 @@ gfilter.init = function (data, rootElement) {
 
     var failedColumns = [];
     var createRowCounter = function() {
-        var humanize = function(x) {
-            // http://stackoverflow.com/questions/661562/how-to-format-a-float-in-javascript/29249277#29249277
-            return x.toPrecision(2).replace(/\.?0*$/,'');
-        }
     
         var rowCounterId = 'rowCounter'
         addDiv(rowCounterId);
@@ -104,7 +107,7 @@ gfilter.init = function (data, rootElement) {
                     return 'All <strong>' + total + '</strong> records shown. Click on the graphs to apply filters.'
                 }
                 var resetButton = '<a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>';
-                var percent = humanize(100 * selectedCount / total);
+                var percent = gfilter.humanizePercent(100 * selectedCount / total);
                 return 'Selected ' + percent + '% (' + selectedCount + ' out of ' + total + ' records) | ' + resetButton;
         });
     }
