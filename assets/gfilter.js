@@ -227,7 +227,10 @@ gfilter.init = function (data, rootElement) {
 
     for (var i = 0; i < params.length; i++) {
         var propName = params[i];
-        var chartId = "chart-hist-" + propName;
+        // Spaces confuse query selectors. This escaping prevents:
+        // Uncaught SyntaxError: Failed to execute 'querySelector' on 'Document': '#chart-hist-Running Bal.' is not a valid selector.
+        var escapedName = propName.replace(' ', '').replace('.', '');
+        var chartId = "chart-hist-" + escapedName;
         var chartDiv = addDiv(chartId);
 
         var uniques = d3.map(data, function (d) { return d[propName] });
