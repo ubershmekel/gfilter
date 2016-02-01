@@ -1,0 +1,26 @@
+{
+  "name": "gfilter",
+  "homepage": "https://github.com/ubershmekel/gfilter",
+  "authors": [
+    "Yuval Greenfield <ubershmekel@gmail.com>"
+  ],
+  "description": "A cross filter dashboard to visualize any csv you throw at it.",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "gfilter",
+    "crossfilter",
+    "dcjs",
+    "histogram",
+    "visualize",
+    "csv"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
