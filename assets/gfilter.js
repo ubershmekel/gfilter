@@ -46,7 +46,24 @@ gfilter.init = function (data, rootElement) {
         div.id = id;
         div.className = gfilter.className;
         rootElement.appendChild(div);
+        
         return div;
+    }
+
+    function createFilterDiv(div) {
+        var controls = document.createElement("div");
+        controls.className = 'filter';
+        div.appendChild(controls);
+    }
+    
+    function createChartDiv(propName) {
+        // Spaces confuse query selectors. This escaping prevents:
+        // Uncaught SyntaxError: Failed to execute 'querySelector' on 'Document': '#chart-hist-Running Bal.' is not a valid selector.
+        var escapedName = propName.replace(' ', '').replace('.', '');
+        var chartId = "chart-hist-" + escapedName;
+        var chartDiv = addDiv(chartId);
+        createFilterDiv(chartDiv);
+        return chartDiv;
     }
 
     var addText = function (text, parentDiv, cls) {
@@ -113,6 +130,7 @@ gfilter.init = function (data, rootElement) {
     }
 
     var createDateHistogram = function (propName) {
+        var chartDiv = createChartDiv(propName);
         addText(propName, chartDiv, "chartTitle");
         data.forEach(function (d) {
             d[propName] = parseDate(d[propName]);
@@ -142,9 +160,10 @@ gfilter.init = function (data, rootElement) {
         };
 
         var dimDate = ndx.dimension(valueFunc);
-        var barChart = dc.barChart("#" + chartId);
+        var barChart = dc.barChart(chartDiv);
         barChart
             .width(gfilter.width).height(gfilter.height)
+            .controlsUseVisibility(true)
             .dimension(dimDate)
             .group(dimDate.group(roundToHistogramBar))
             //.group(dimDate.group().reduceCount())
@@ -155,6 +174,7 @@ gfilter.init = function (data, rootElement) {
     };
         
     var createHistogram = function (propName) {
+        var chartDiv = createChartDiv(propName);
         addText(propName, chartDiv, "chartTitle");
         var numericValue = function (d) {
             if (d[propName] === "")
@@ -199,7 +219,7 @@ gfilter.init = function (data, rootElement) {
         };
         countGroup = dimNumeric.group(roundToHistogramBar);
         gfilter.group = countGroup;
-        var barChart = dc.barChart("#" + chartId);
+        var barChart = dc.barChart(chartDiv);
         barChart.xUnits(function () { return barCount; });
 
         //Can't use .xAxisLabel because rowChart have no equivalent - .xAxisLabel(propName)
@@ -209,29 +229,27 @@ gfilter.init = function (data, rootElement) {
             .group(countGroup)
             .x(d3.scale.linear().domain([min - lastBarSize, max + lastBarSize]).rangeRound([0, 500]))
         //.x(d3.scale.linear().range([100, 0]))
-            .elasticY(true);
+            .elasticY(true)
+            .controlsUseVisibility(true);
         barChart.yAxis().ticks(2);
     }
 
     var createRowChart = function (propName) {
+        var chartDiv = createChartDiv(propName);
         addText(propName, chartDiv, "chartTitle");
         var dim = ndx.dimension(function (d) { return d[propName]; });
         var group = dim.group().reduceCount();
-        var rowChart = dc.rowChart("#" + chartId);
+        var rowChart = dc.rowChart(chartDiv);
         rowChart
             .width(gfilter.width).height(gfilter.height)
+            .controlsUseVisibility(true)
             .dimension(dim)
             .group(group)
             .elasticX(true);
     }
-
+    
     for (var i = 0; i < params.length; i++) {
         var propName = params[i];
-        // Spaces confuse query selectors. This escaping prevents:
-        // Uncaught SyntaxError: Failed to execute 'querySelector' on 'Document': '#chart-hist-Running Bal.' is not a valid selector.
-        var escapedName = propName.replace(' ', '').replace('.', '');
-        var chartId = "chart-hist-" + escapedName;
-        var chartDiv = addDiv(chartId);
 
         var uniques = d3.map(data, function (d) { return d[propName] });
         var uniqueCount = uniques.size();

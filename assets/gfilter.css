@@ -173,7 +173,8 @@ div.dc-chart {
     font-weight: bold;
 }
 
-.dc-data-table {
+#dataTable {
+    clear: both;
 }
 
 .dc-chart g.state {
@@ -406,4 +407,8 @@ Tables
 
 strong {
     font-weight: bold;
+}
+
+.filter {
+    height: 1em;
 }

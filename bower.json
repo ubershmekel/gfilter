@@ -24,6 +24,6 @@
     "tests"
   ],
   "dependencies": {
-    "dcjs": "^1.7.5"
+    "dcjs": "^2.0.0-beta.27"
   }
 }
