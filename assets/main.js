@@ -66,12 +66,13 @@
         var params = getParameters();
         var downloadUrl = params['dl'];
         var preProcessCode = params['pre'];
+        var type = params['type'];
         if (downloadUrl) {
             var dotLoc = downloadUrl.lastIndexOf('.');
             var extension = null;
             if(dotLoc != -1)
                 extension = downloadUrl.substring(dotLoc);
-            if(extension === '.json') {
+            if(extension === '.json' || type === 'json') {
                 d3.json(downloadUrl, function(data) {
                     if(preProcessCode)
                         eval(preProcessCode);

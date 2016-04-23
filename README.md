@@ -12,6 +12,7 @@ https://ubershmekel.github.io/gfilter/
 * https://ubershmekel.github.io/gfilter/?dl=testData/Sacramentorealestatetransactions.csv
 * https://ubershmekel.github.io/gfilter/?dl=testData/SacramentocrimeJanuary2006.csv
 * https://ubershmekel.github.io/gfilter/?dl=https://www.reddit.com/r/all.json&pre=data%3Ddata.data.children.map(function(v){return%20v.data})
+* https://ubershmekel.github.io/gfilter/?dl=https://api.twitch.tv/kraken/streams&type=json&pre=data%3Ddata.streams
 * https://ubershmekel.github.io/gfilter/?dl=https://api.twitch.tv/kraken/games/top.json&pre=data%3Ddata.top)
 
 # Credits
