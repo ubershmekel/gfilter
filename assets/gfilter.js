@@ -237,7 +237,12 @@ gfilter.init = function (data, rootElement) {
     var createRowChart = function (propName) {
         var chartDiv = createChartDiv(propName);
         addText(propName, chartDiv, "chartTitle");
-        var dim = ndx.dimension(function (d) { return d[propName]; });
+        var dim = ndx.dimension(function (d) {
+            // toString here because `undefined` can cause crossfilter to crash Chrome/FF with out of memory.
+            // https://github.com/square/crossfilter/issues/133
+            // https://github.com/square/crossfilter/wiki/API-Reference#dimension
+            return "" + d[propName];
+        });
         var group = dim.group().reduceCount();
         var rowChart = dc.rowChart(chartDiv);
         rowChart
@@ -248,39 +253,54 @@ gfilter.init = function (data, rootElement) {
             .elasticX(true);
     }
     
-    for (var i = 0; i < params.length; i++) {
-        var propName = params[i];
+    function analyzeAndShowColumns() {
+        var allowedTypes = ["boolean", "number", "string"];
+        for (var i = 0; i < params.length; i++) {
+            var propName = params[i];
 
-        var uniques = d3.map(data, function (d) { return d[propName] });
-        var uniqueCount = uniques.size();
-        if (uniqueCount < 2) {
-            // Just one value is not interesting to visualize 
-            failedColumns.push(propName);
-            continue;
-        } else if (uniqueCount < 6) {
-            // arbitrary amount that feels better to click on than to drag filter
-            createRowChart(propName);
-        //} else if (isNumeric(data[0][propName])) {
-        } else if (isNumericArray(uniques.keys())) {
-            // Numerical data is shown in histograms
-            createHistogram(propName);
-        } else if (uniqueCount < 21) {
-            // arbitrary amount that looks ok on the rowChart
-            createRowChart(propName);
-        } else if (isDate(data[0][propName])) {
-            createDateHistogram(propName);
-        } else {
-            failedColumns.push(propName);
+            var propFirstType = typeof data[0][propName];
+            if (allowedTypes.indexOf(propFirstType) === -1) {
+                // type not supported
+                failedColumns.push(propName);
+                continue;
+            }
+
+            var uniques = d3.map(data, function (d) { return d[propName] });
+            var uniqueCount = uniques.size();
+            if (uniqueCount < 2) {
+                // Just one value is not interesting to visualize 
+                failedColumns.push(propName);
+                continue;
+            } else if (uniqueCount < 6) {
+                // arbitrary amount that feels better to click on than to drag filter
+                createRowChart(propName);
+            //} else if (isNumeric(data[0][propName])) {
+            } else if (isNumericArray(uniques.keys())) {
+                // Numerical data is shown in histograms
+                createHistogram(propName);
+            } else if (uniqueCount < 21) {
+                // arbitrary amount that looks ok on the rowChart
+                createRowChart(propName);
+            } else if (isDate(data[0][propName])) {
+                createDateHistogram(propName);
+            } else {
+                failedColumns.push(propName);
+            }
         }
     }
 
-    createRowCounter();
-    createDataWidget();
+    function main() {
+        analyzeAndShowColumns();
+        createRowCounter();
+        createDataWidget();
 
-    if (failedColumns.length > 0)
-        addText("Did not create chart for the columns: " + failedColumns.join(", "), complaintsDiv, "complaint");
+        if (failedColumns.length > 0)
+            addText("Did not create chart for the columns: " + failedColumns.join(", "), complaintsDiv, "complaint");
 
-    dc.renderAll();
+        dc.renderAll();
+    }
+    
+    main();
 };
 
 

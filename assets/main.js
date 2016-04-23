@@ -56,17 +56,34 @@
         var params = {};
         var prmarr = prmstr.split("&");
         for (var i = 0; i < prmarr.length; i++) {
-            var tmparr = prmarr[i].split("=");
-            params[tmparr[0]] = tmparr[1];
+            var pairs = prmarr[i].split("=");
+            params[pairs[0]] = decodeURIComponent(pairs[1]);
         }
         return params;
     }
 
-    var params = getParameters();
-    if (params['dl']) {
-        d3.csv(params['dl'], function (rows) {
-            gfilter(rows, document.body);
-        });
+    function handleUrlData() {
+        var params = getParameters();
+        var downloadUrl = params['dl'];
+        var preProcessCode = params['pre'];
+        if (downloadUrl) {
+            var dotLoc = downloadUrl.lastIndexOf('.');
+            var extension = null;
+            if(dotLoc != -1)
+                extension = downloadUrl.substring(dotLoc);
+            if(extension === '.json') {
+                d3.json(downloadUrl, function(data) {
+                    if(preProcessCode)
+                        eval(preProcessCode);
+                    gfilter(data, document.body);
+                });
+            } else {
+                d3.csv(downloadUrl, function (rows) {
+                    gfilter(rows, document.body);
+                });
+            }
+        }
     }
-
+    
+    handleUrlData();
 })();
