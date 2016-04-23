@@ -49,17 +49,31 @@
     ////////////////////////////////////////////////////////////////////////////
     function getParameters() {
         var prmstr = window.location.search.substr(1);
-        return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+        if (prmstr != null && prmstr != "") {
+            if (prmstr.indexOf(':::') === -1)
+                return transformToAssocArray(prmstr, "&", "=");
+            else
+                // Special characters that I've never seen in a url or js code
+                // so I can more easily link to websites and include preprocessing code
+                return transformToAssocArray(prmstr, "...", ":::");
+        } else {
+            return {};
+        }
     }
 
-    function transformToAssocArray(prmstr) {
+    function transformToAssocArray(prmstr, enderStr, equalStr) {
         var params = {};
-        var prmarr = prmstr.split("&");
+        var prmarr = prmstr.split(enderStr);
         for (var i = 0; i < prmarr.length; i++) {
-            var pairs = prmarr[i].split("=");
+            var pairs = prmarr[i].split(equalStr);
             params[pairs[0]] = decodeURIComponent(pairs[1]);
         }
         return params;
+    }
+    
+    function error(line) {
+        humane.error(line);
+        console.error(line);
     }
 
     function handleUrlData() {
@@ -80,6 +94,14 @@
                 });
             } else {
                 d3.csv(downloadUrl, function (rows) {
+                    if(rows == null) {
+                        error("Failed to fetch CSV url");
+                        return;
+                    }
+                    if(!rows.length) {
+                        error("Empty or invalid CSV from url");
+                        return;
+                    }
                     gfilter(rows, document.body);
                 });
             }
