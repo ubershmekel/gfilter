@@ -6,12 +6,13 @@ https://ubershmekel.github.io/gfilter/
 
 # Example Data
 
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/TechCrunchcontinentalUSA.csv
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/spent.csv
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/other.csv
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/flights-3m.csv
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/Sacramentorealestatetransactions.csv
-* https://ubershmekel.github.io/gfilter/?dl=https://ubershmekel.github.io/csvData/SacramentocrimeJanuary2006.csv
+* https://ubershmekel.github.io/gfilter/?dl=testData/TechCrunchcontinentalUSA.csv
+* https://ubershmekel.github.io/gfilter/?dl=testData/spent.csv
+* https://ubershmekel.github.io/gfilter/?dl=testData/flights.csv
+* https://ubershmekel.github.io/gfilter/?dl=testData/Sacramentorealestatetransactions.csv
+* https://ubershmekel.github.io/gfilter/?dl=testData/SacramentocrimeJanuary2006.csv
+* https://ubershmekel.github.io/gfilter/?dl=https://www.reddit.com/r/all.json&pre=data%3Ddata.data.children.map(function(v){return%20v.data})
+* https://ubershmekel.github.io/gfilter/?dl=https://api.twitch.tv/kraken/games/top.json&pre=data%3Ddata.top)
 
 # Credits
 * https://d3js.org/ - a JavaScript library for visualizing data with HTML, SVG, and CSS.
