@@ -100,6 +100,9 @@
             var rootElement = document.body;
             switch(vizType) {
                 case "plot":
+                    // remove help header, I'm not sure if I want to do this at all now.
+                    //d3.selectAll('#tutorialsInHeader').remove();
+
                     plotter.show(rootElement, data, xprop, lineTypeProp)
                     break;
                 case "gfilter":
@@ -110,7 +113,6 @@
         }
 
         if (downloadUrl) {
-            d3.selectAll('#tutorialsInHeader').remove();
             var dotLoc = downloadUrl.lastIndexOf('.');
             var extension = null;
             if(dotLoc != -1)
