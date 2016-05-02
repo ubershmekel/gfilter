@@ -35,16 +35,19 @@
 
 <body>
     <div id="header">
-        <a class="logo" href="https://github.com/ubershmekel/gfilter">gfilter.js</a>
-        <span class="logo" id="fileName"></span>
-        
-        Drop a csv file on this page <input type="file" id="gfilterDropFiles" /> or check out an example:
-        
-        <a href="?dl=testData/TechCrunchcontinentalUSA.csv">TechCrunch Investments</a>
-        <a href="?dl=testData/spent.csv">Expenses</a>
-        <a href="?dl=testData/Sacramentorealestatetransactions.csv">RealEstate</a>
-        <a href="?dl=testData/flights.csv">Flights</a>
-
+        <a class="logo" href=".">gfilter.js</a>
+        <a id="githubLink" href="https://github.com/ubershmekel/gfilter">Source on Github<img style="height: 1.2em;" src="assets/octocat.png"></a>
+        <div id="tutorialsInHeader">
+            <span class="logo" id="fileName"></span>
+            
+            Drop a csv file on this page <input type="file" id="gfilterDropFiles" /> or check out an example:
+            
+            <a href="?dl=testData/TechCrunchcontinentalUSA.csv">TC Investments</a>,
+            <a href="?dl=testData/spent.csv">Expenses</a>,
+            <a href="?dl=testData/Sacramentorealestatetransactions.csv">RealEstate</a>,
+            <a href="?dl=testData/flights.csv">Flights</a>
+            
+        </div>
     </div>
 
     <div id="dropzone">
@@ -56,6 +59,8 @@
     <script type="text/javascript" src="./assets/dc.js"></script>
     <script type="text/javascript" src="./assets/dnd.js"></script>
     <script type="text/javascript" src="./assets/gfilter.js"></script>
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.10.0.min.js"></script>
+    <script type="text/javascript" src="./assets/plotter.js"></script>
     <script type="text/javascript" src="./assets/main.js"></script>
     
 </body>

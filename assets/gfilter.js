@@ -26,12 +26,18 @@ gfilter.humanizePercent = function(x) {
     return x.toFixed(2).replace(/\.?0*$/,'');
 }
 
+gfilter.isNumeric = function (n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+    
+gfilter.isNumericArray = function(seq) {
+    for(var i = 0; i < seq.length; i++) {
+        if(gfilter.isNumeric(seq[i]))
+            return true;
+    }
+};
 
 gfilter.init = function (data, rootElement) {
-    var isNumeric = function (n) {
-        return !isNaN(parseFloat(n)) && isFinite(n);
-    }
-    
     var parseDate = function(obj) {
         var iso = d3.time.format.utc("%Y-%m-%dT%H:%M:%S");
         return iso.parse(obj);
@@ -95,13 +101,6 @@ gfilter.init = function (data, rootElement) {
             .columns(params)
     };
     
-    var isNumericArray = function(seq) {
-        for(var i = 0; i < seq.length; i++) {
-            if(isNumeric(seq[i]))
-                return true;
-        }
-    };
-
     var complaintsDiv = addDiv("complaints");
     var params = Object.keys(data[0]);
     var ndx = crossfilter(data);
@@ -275,7 +274,7 @@ gfilter.init = function (data, rootElement) {
                 // arbitrary amount that feels better to click on than to drag filter
                 createRowChart(propName);
             //} else if (isNumeric(data[0][propName])) {
-            } else if (isNumericArray(uniques.keys())) {
+            } else if (gfilter.isNumericArray(uniques.keys())) {
                 // Numerical data is shown in histograms
                 createHistogram(propName);
             } else if (uniqueCount < 21) {

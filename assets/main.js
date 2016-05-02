@@ -75,38 +75,53 @@
         humane.error(line);
         console.error(line);
     }
-
-    function handleUrlData() {
+    
+    function main() {
         var params = getParameters();
         var downloadUrl = params['dl'];
         var preProcessCode = params['pre'];
         var type = params['type'];
+        var vizType = params['viz'];
+        var xprop = params['xprop'];
+        var lineTypeProp = params['linetypeprop'];
+        
+        function handleData(data) {
+            if(preProcessCode) {
+                eval(preProcessCode);
+            }
+            if(data == null) {
+                error("Failed to fetch CSV url");
+                return;
+            }
+            if(!data.length) {
+                error("Empty or invalid CSV from url");
+                return;
+            }
+            var rootElement = document.body;
+            switch(vizType) {
+                case "plot":
+                    plotter.show(rootElement, data, xprop, lineTypeProp)
+                    break;
+                case "gfilter":
+                default:
+                    gfilter(data, rootElement);
+                    break;
+            }
+        }
+
         if (downloadUrl) {
+            d3.selectAll('#tutorialsInHeader').remove();
             var dotLoc = downloadUrl.lastIndexOf('.');
             var extension = null;
             if(dotLoc != -1)
                 extension = downloadUrl.substring(dotLoc);
             if(extension === '.json' || type === 'json') {
-                d3.json(downloadUrl, function(data) {
-                    if(preProcessCode)
-                        eval(preProcessCode);
-                    gfilter(data, document.body);
-                });
+                d3.json(downloadUrl, handleData);
             } else {
-                d3.csv(downloadUrl, function (rows) {
-                    if(rows == null) {
-                        error("Failed to fetch CSV url");
-                        return;
-                    }
-                    if(!rows.length) {
-                        error("Empty or invalid CSV from url");
-                        return;
-                    }
-                    gfilter(rows, document.body);
-                });
+                d3.csv(downloadUrl, handleData);
             }
         }
     }
     
-    handleUrlData();
+    main();
 })();
