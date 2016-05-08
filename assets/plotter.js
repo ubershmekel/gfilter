@@ -50,6 +50,7 @@ var plotter = {};
         var xtitle = undefined;
         var ytitle = undefined;
         if(xprop) {
+            xtitle = xprop;
             removeFromArray(columnsInfo.numericColumns, xprop);
             for (var i = 0; i < allRows.length; i++) {
                 row = allRows[i];
@@ -66,14 +67,22 @@ var plotter = {};
             }
         }
         
-        for(var i = 0; i < columnsInfo.numericColumns.length; i++) {
-            var cname = columnsInfo.numericColumns[i];
+        // traces = [{x: x, y:y1}, {x: x, y: y2}];
+        var tracesList = [];
+        
+        for(var colIndex = 0; colIndex < columnsInfo.numericColumns.length; colIndex++) {
+            var cname = columnsInfo.numericColumns[colIndex];
             ytitle = cname;
-            var y = [];
-            ySeq.push(y);
-            for (var i = 0; i < allRows.length; i++) {
-                y.push(allRows[i][cname]);
-            };
+            var yVals = [];
+            tracesList.push({
+                name: cname,
+                x: x,
+                y: yVals,
+            });
+            for (var rowIndex = 0; rowIndex < allRows.length; rowIndex++) {
+                yVals.push(allRows[rowIndex][cname]);
+            }
+            console.log(cname);
         }
         
         var plotDiv = document.getElementById("plot");
@@ -81,13 +90,6 @@ var plotter = {};
         div.id = "myplotyo";
         div.className = "plot";
         rootElement.appendChild(div);
-        // traces = [{x: x, y:y1}, {x: x, y: y2}];
-        var traces = ySeq.map(function(val) {
-            return {
-                x: x,
-                y: val
-            };
-        });
         var layout = {
             //title: 'Plotting CSV data from AJAX call',
             yaxis: {
@@ -97,6 +99,6 @@ var plotter = {};
                 title: xtitle
             }
         };
-        Plotly.newPlot(div, traces, layout);
+        Plotly.newPlot(div, tracesList, layout);
     };
 })();
