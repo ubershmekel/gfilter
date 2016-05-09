@@ -1,5 +1,20 @@
 // The main function to set up the git hub page demo.
 // See the `gfilter` invocation.
+var start = new Date().getTime();
+var elapsed = function() {
+    return new Date().getTime() - start;
+};
+function logStatus(line) {
+    // used by gfilter.js too
+    document.getElementById("statusBox").innerHTML = line;
+    console.log(elapsed() + ' ' + line);
+}
+function mainDone() {
+    var spinner = document.getElementById('spinner');
+    if(spinner)
+        spinner.parentNode.removeChild(spinner);
+}
+
 (function () {
     ////////////////////////////////////////////////////////////////////////////
     // Drag and drop file handling
@@ -86,10 +101,11 @@
         var lineTypeProp = params['linetypeprop'];
         
         function handleData(data) {
+            logStatus("Got all data, now analyzing");
             if(preProcessCode) {
                 eval(preProcessCode);
             }
-            if(data == null) {
+            if(data === null) {
                 error("Failed to fetch CSV url");
                 return;
             }
@@ -102,8 +118,10 @@
                 case "plot":
                     // remove help header, I'm not sure if I want to do this at all now.
                     //d3.selectAll('#tutorialsInHeader').remove();
-
-                    plotter.show(rootElement, data, xprop, lineTypeProp)
+                    logStatus("Plotting");
+                    setTimeout(function() {
+                        plotter.show(rootElement, data, xprop, lineTypeProp)
+                    });
                     break;
                 case "gfilter":
                 default:
@@ -111,6 +129,18 @@
                     break;
             }
         }
+        
+        function showProgress(dgetter) {
+            logStatus("Downloading data");
+
+            dgetter
+                .on("load", handleData)
+                .on("progress", function() {
+                    logStatus(d3.event.loaded + ' / ' + d3.event.total);
+                })
+                .get();
+        }
+        
 
         if (downloadUrl) {
             var dotLoc = downloadUrl.lastIndexOf('.');
@@ -118,10 +148,12 @@
             if(dotLoc != -1)
                 extension = downloadUrl.substring(dotLoc);
             if(extension === '.json' || type === 'json') {
-                d3.json(downloadUrl, handleData);
+                showProgress(d3.json(downloadUrl));
             } else {
-                d3.csv(downloadUrl, handleData);
+                showProgress(d3.csv(downloadUrl));
             }
+        } else {
+            mainDone();
         }
     }
     

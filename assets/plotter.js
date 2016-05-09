@@ -99,5 +99,7 @@ var plotter = {};
             }
         };
         Plotly.newPlot(div, tracesList, layout);
+        logStatus("");
+        mainDone();
     };
 })();

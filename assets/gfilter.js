@@ -108,8 +108,8 @@ gfilter.init = function (data, rootElement) {
     gfilter.dimensions = {};
 
     var failedColumns = [];
-    var createRowCounter = function() {
     
+    var createRowCounter = function() {
         var rowCounterId = 'rowCounter'
         addDiv(rowCounterId);
         var rowCounter = dc.numberDisplay ('#' + rowCounterId);
@@ -252,51 +252,85 @@ gfilter.init = function (data, rootElement) {
             .elasticX(true);
     }
     
-    function analyzeAndShowColumns() {
+    function showColumn() {
         var allowedTypes = ["boolean", "number", "string"];
-        for (var i = 0; i < params.length; i++) {
-            var propName = params[i];
+        var propFirstType = typeof data[0][propName];
+        if (allowedTypes.indexOf(propFirstType) === -1) {
+            // type not supported
+            failedColumns.push(propName);
+            return;
+        }
 
-            var propFirstType = typeof data[0][propName];
-            if (allowedTypes.indexOf(propFirstType) === -1) {
-                // type not supported
-                failedColumns.push(propName);
-                continue;
-            }
+        var uniques = d3.map(data, function (d) { return d[propName] });
+        var uniqueCount = uniques.size();
+        if (uniqueCount < 2) {
+            // Just one value is not interesting to visualize 
+            failedColumns.push(propName);
+            return;
+        } else if (uniqueCount < 6) {
+            // arbitrary amount that feels better to click on than to drag filter
+            createRowChart(propName);
+        //} else if (isNumeric(data[0][propName])) {
+        } else if (gfilter.isNumericArray(uniques.keys())) {
+            // Numerical data is shown in histograms
+            createHistogram(propName);
+        } else if (uniqueCount < 21) {
+            // arbitrary amount that looks ok on the rowChart
+            createRowChart(propName);
+        } else if (isDate(data[0][propName])) {
+            createDateHistogram(propName);
+        } else {
+            failedColumns.push(propName);
+        }
+    }
+    
+    var paramIndex = 0;
+    var propName;
+    function analyzeAndShowColumns() {
+        if (paramIndex < params.length) {
+            propName = params[paramIndex];
+            logStatus("Analyzing " + propName);
+            paramIndex++;
 
-            var uniques = d3.map(data, function (d) { return d[propName] });
-            var uniqueCount = uniques.size();
-            if (uniqueCount < 2) {
-                // Just one value is not interesting to visualize 
-                failedColumns.push(propName);
-                continue;
-            } else if (uniqueCount < 6) {
-                // arbitrary amount that feels better to click on than to drag filter
-                createRowChart(propName);
-            //} else if (isNumeric(data[0][propName])) {
-            } else if (gfilter.isNumericArray(uniques.keys())) {
-                // Numerical data is shown in histograms
-                createHistogram(propName);
-            } else if (uniqueCount < 21) {
-                // arbitrary amount that looks ok on the rowChart
-                createRowChart(propName);
-            } else if (isDate(data[0][propName])) {
-                createDateHistogram(propName);
-            } else {
-                failedColumns.push(propName);
-            }
+            // keep going
+            funcArray.unshift(showColumn, analyzeAndShowColumns);
+        }
+    }
+    
+    function finish() {
+        if (failedColumns.length > 0) {
+            var complaintText = "Did not create chart for the columns: " + failedColumns.join(", ");
+            if(typeof logStatus === "undefined")
+                addText(complaintText, complaintsDiv, "complaint");
+            else
+                logStatus(complaintText);
+        }
+
+        dc.renderAll();
+        
+        if(typeof mainDone !== "undefined") {
+            mainDone();
+        }
+    }
+    
+    var funcArray = [];
+    function setTimeoutCallForEach() {
+        if(funcArray.length) {
+            var nextFunc = funcArray.shift();
+            nextFunc();
+            setTimeout(setTimeoutCallForEach);
         }
     }
 
     function main() {
-        analyzeAndShowColumns();
-        createRowCounter();
-        createDataWidget();
-
-        if (failedColumns.length > 0)
-            addText("Did not create chart for the columns: " + failedColumns.join(", "), complaintsDiv, "complaint");
-
-        dc.renderAll();
+        // setTimeout between functions so the user can see the text progress updates 
+        funcArray = [
+            analyzeAndShowColumns,
+            createRowCounter,
+            createDataWidget,
+            finish
+        ];
+        setTimeout(setTimeoutCallForEach);
     }
     
     main();
