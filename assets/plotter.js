@@ -82,7 +82,6 @@ var plotter = {};
             for (var rowIndex = 0; rowIndex < allRows.length; rowIndex++) {
                 yVals.push(allRows[rowIndex][cname]);
             }
-            console.log(cname);
         }
         
         var plotDiv = document.getElementById("plot");
