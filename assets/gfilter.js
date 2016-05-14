@@ -2,7 +2,6 @@
 /* global dnd */
 /* global crossfilter */
 var gfilter = function (data, rootElement) {
-    gfilter.removeAll();
     gfilter.init(data, rootElement);
 };
 
@@ -10,10 +9,6 @@ gfilter.className = "gfilter";
 gfilter.width = 470;
 gfilter.height = 300;
 
-gfilter.removeAll = function () {
-    // remove old
-    d3.selectAll("." + gfilter.className).remove();
-};
 
 gfilter.addData = function (data) {
     gfilter.crossfilter.add(data);

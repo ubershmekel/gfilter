@@ -1,3 +1,7 @@
+//https://jslinterrors.com/a-is-better-written-in-dot-notation
+// I write dynamic property access with ["thisnotation"] and typed access with dot notation.
+/*jshint -W069 */
+
 // The main function to set up the git hub page demo.
 // See the `gfilter` invocation.
 var start = new Date().getTime();
@@ -25,7 +29,7 @@ function mainDone() {
     var dropperViz = d3.select("#dropzone");
     var uiUpdateTitle = function(title) {
         d3.select("#fileName").text(" - " + title);
-    }
+    };
     var uiFileHover = function() {
         dropperViz.classed("active", true);
     };
@@ -35,7 +39,7 @@ function mainDone() {
     var readFiles = function (files) {
         var dataArray = files[0].data;
         uiUpdateTitle(files[0].name);
-        gfilter(dataArray, document.body);
+        handleData(dataArray);
     };
     var dropper = dropperSelect
         .call(dnd.dropper()
@@ -64,7 +68,7 @@ function mainDone() {
     ////////////////////////////////////////////////////////////////////////////
     function getParameters() {
         var prmstr = window.location.search.substr(1);
-        if (prmstr != null && prmstr != "") {
+        if (prmstr !== null && prmstr !== "") {
             if (prmstr.indexOf(':::') === -1)
                 return transformToAssocArray(prmstr, "&", "=");
             else
@@ -90,51 +94,62 @@ function mainDone() {
         humane.error(line);
         console.error(line);
     }
-    
-    function main() {
-        var params = getParameters();
-        var downloadUrl = params['dl'];
+
+    function handleData(data, params) {
+        params = params || {};
         var preProcessCode = params['pre'];
-        var type = params['type'];
         var vizType = params['viz'];
         var xprop = params['xprop'];
         var lineTypeProp = params['linetypeprop'];
         
-        function handleData(data) {
-            logStatus("Got all data, now analyzing");
-            if(preProcessCode) {
-                eval(preProcessCode);
-            }
-            if(data === null) {
-                error("Failed to fetch CSV url");
-                return;
-            }
-            if(!data.length) {
-                error("Empty or invalid CSV from url");
-                return;
-            }
-            var rootElement = document.body;
-            switch(vizType) {
-                case "plot":
-                    // remove help header, I'm not sure if I want to do this at all now.
-                    //d3.selectAll('#tutorialsInHeader').remove();
-                    logStatus("Plotting");
-                    setTimeout(function() {
-                        plotter.show(rootElement, data, xprop, lineTypeProp)
-                    });
-                    break;
-                case "gfilter":
-                default:
-                    gfilter(data, rootElement);
-                    break;
-            }
+        logStatus("Got all data, now analyzing");
+        if(preProcessCode) {
+            // This `eval` is an XSS waiting to happen, but I'm not sure if
+            // I have a better way to do this.
+            // TODO: Maybe I should drop this feature?
+            eval(preProcessCode);
         }
+        if(data === null) {
+            error("Failed to fetch CSV url");
+            return;
+        }
+        if(!data.length) {
+            error("Empty or invalid CSV from url");
+            return;
+        }
+        var rootElement = document.getElementById('vizContainer');
+        rootElement.innerHTML = '';
+        switch(vizType) {
+            case "plot":
+                // remove help header, I'm not sure if I want to do this at all now.
+                //d3.selectAll('#tutorialsInHeader').remove();
+                logStatus("Plotting");
+                setTimeout(function() {
+                    // setTimeout so the log appears to the user
+                    plotter.show(rootElement, data, xprop, lineTypeProp);
+                });
+                break;
+            case "gfilter":
+            /* falls through */
+            default:
+                gfilter(data, rootElement);
+                break;
+        }
+    }
+        
+    
+    function main() {
+        var params = getParameters();
+        var downloadUrl = params['dl'];
+        var type = params['type'];
         
         function showProgress(dgetter) {
             logStatus("Downloading data");
 
             dgetter
-                .on("load", handleData)
+                .on("load", function(data) {
+                    handleData(data, params);
+                })
                 .on("progress", function() {
                     logStatus(d3.event.loaded + ' / ' + d3.event.total);
                 })
