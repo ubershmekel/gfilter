@@ -98,9 +98,11 @@ function mainDone() {
     function handleData(data, params) {
         params = params || {};
         var preProcessCode = params['pre'];
+        
         var vizType = params['viz'];
         var xprop = params['xprop'];
         var lineTypeProp = params['linetypeprop'];
+        var multiPlot = params['multiplot']
         
         logStatus("Got all data, now analyzing");
         if(preProcessCode) {
@@ -126,7 +128,7 @@ function mainDone() {
                 logStatus("Plotting");
                 setTimeout(function() {
                     // setTimeout so the log appears to the user
-                    plotter.show(rootElement, data, xprop, lineTypeProp);
+                    plotter.show(rootElement, data, xprop, lineTypeProp, multiPlot);
                 });
                 break;
             case "gfilter":

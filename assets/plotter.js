@@ -40,9 +40,9 @@ var plotter = {};
         }
     }
     
-    plotter.show = function(rootElement, allRows, xprop, lineTypeProp) {
+    plotter.show = function(rootElement, allRows, xprop, lineTypeProp, multiplot) {
         var columnsInfo = plotter.guessColumnTypes(allRows);
-        console.log(columnsInfo);
+        //console.log(columnsInfo);
         //console.log(allRows);
 
         var x = [];
@@ -59,10 +59,11 @@ var plotter = {};
                 // TODO: y.push
             }
         } else {
-            if(columnsInfo.numericColumns.length == 1) {
+            // no xprop mentioned - we try to use the id as the xprop
+            if(columnsInfo.numericColumns.length >= 1) {
                 xtitle = 'Row index';
-                for (var i = 0; i < allRows.length; i++) {
-                    x.push(i);
+                for (var j = 0; j < allRows.length; j++) {
+                    x.push(j);
                 }
             }
         }
@@ -74,17 +75,23 @@ var plotter = {};
             var cname = columnsInfo.numericColumns[colIndex];
             ytitle = cname;
             var yVals = [];
-            tracesList.push({
+            var traceObj = {
                 name: cname,
                 x: x,
                 y: yVals,
-            });
+            };
+            if(multiplot && colIndex > 0) {
+                var plotlyIndex = colIndex + 1;
+                traceObj.xaxis = 'x' + plotlyIndex; 
+                traceObj.yaxis = 'y' + plotlyIndex; 
+            }
+            
+            tracesList.push(traceObj);
             for (var rowIndex = 0; rowIndex < allRows.length; rowIndex++) {
                 yVals.push(allRows[rowIndex][cname]);
             }
         }
         
-        var plotDiv = document.getElementById("plot");
         var div = document.createElement("div");
         div.id = "myplotyo";
         div.className = "plot";
@@ -92,10 +99,17 @@ var plotter = {};
         var layout = {
             //title: 'Plotting CSV data from AJAX call',
             yaxis: {
-                title: ytitle
+                title: ytitle,
+                domain: [0.5, 1]
             },
             xaxis: {
                 title: xtitle
+            },
+            xaxis2: {
+                anchor: "y2"
+            },
+            yaxis2: {
+                domain: [0, 0.5]
             }
         };
         Plotly.newPlot(div, tracesList, layout);
