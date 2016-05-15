@@ -80,11 +80,6 @@ var plotter = {};
                 x: x,
                 y: yVals,
             };
-            if(multiplot && colIndex > 0) {
-                var plotlyIndex = colIndex + 1;
-                traceObj.xaxis = 'x' + plotlyIndex; 
-                traceObj.yaxis = 'y' + plotlyIndex; 
-            }
             
             tracesList.push(traceObj);
             for (var rowIndex = 0; rowIndex < allRows.length; rowIndex++) {
@@ -92,27 +87,40 @@ var plotter = {};
             }
         }
         
-        var div = document.createElement("div");
-        div.id = "myplotyo";
-        div.className = "plot";
-        rootElement.appendChild(div);
+        function newDiv() {
+            var div = document.createElement("div");
+            div.className = "myplot";
+            rootElement.appendChild(div);
+            return div; 
+        }
         var layout = {
             //title: 'Plotting CSV data from AJAX call',
             yaxis: {
                 title: ytitle,
-                domain: [0.5, 1]
             },
             xaxis: {
                 title: xtitle
             },
-            xaxis2: {
-                anchor: "y2"
-            },
-            yaxis2: {
-                domain: [0, 0.5]
-            }
         };
-        Plotly.newPlot(div, tracesList, layout);
+        
+        if (multiplot) {
+            for(var k = 0; k < tracesList.length; k++) {
+                layout.title = tracesList[k].name;
+                layout.yaxis.title = layout.title;
+                Plotly.newPlot(newDiv(), [tracesList[k]], layout);
+            }
+        } else {
+            var div = newDiv();
+            div.className = "fullScreenPlot myplot";
+            Plotly.newPlot(div, tracesList, layout);
+        }
+        
+        window.onresize = function() {
+            d3.selectAll('.myplot')[0].forEach(function(el) {
+                Plotly.Plots.resize(el);
+            });
+        };
+        
         logStatus("");
         mainDone();
     };

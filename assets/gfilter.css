@@ -428,8 +428,11 @@ a:hover {
 /**********************************
 * Plots with plotly
 ***********************************/
-.plot {
-    width: 100%;
+.myplot {
+    width: 95%;
+    border-bottom: 2px solid #999;
+}
+.fullScreenPlot {
     height: 90%;
     position: absolute;
 }
