@@ -240,13 +240,92 @@ gfilter.init = function (data, rootElement) {
         var group = dim.group().reduceCount();
         var rowChart = dc.rowChart(chartDiv);
         rowChart
-            .width(gfilter.width).height(gfilter.height)
+            .width(gfilter.width)
+            .height(gfilter.height)
             .controlsUseVisibility(true)
             .dimension(dim)
             .group(group)
             .elasticX(true);
     }
-    
+
+    function getTopN(dataArr, n) {
+        var counts = {};
+
+        for(var i = 0; i< dataArr.length; i++) {
+            var val = dataArr[i];
+            counts[val] = counts[val] ? counts[val] + 1 : 1;
+        };
+
+        // Note in theory we don't need to sort, we can just partition n times
+        // and that would be asymptotically faster.
+        var keysSorted = Object.keys(counts).sort(function(a, b) {
+            return counts[a] - counts[b];
+        });
+
+        var topKeysArray = keysSorted.slice(-n);
+        var othersCount = dataArr.length;
+        var topSingleCount = 0;
+        topKeysArray.map(function(key) {
+            var keyCount = counts[key];
+            othersCount = othersCount - keyCount;
+            if(keyCount > topSingleCount)
+                topSingleCount = keyCount;
+        });
+        return {
+            "topKeysArray": topKeysArray,
+            "othersCount": othersCount,
+            "topSingleCount": topSingleCount
+        }
+    }
+
+    // returns whether it made a chart or not, based on if the "others" bar would be
+    // a reasonable size compared to other values
+    function createRowChartWithOthers(propName, data) {
+        var values = data.map(function(d) {
+            return d[propName];
+        });
+        var topNInfo = getTopN(values, 10);
+        if (topNInfo.topSingleCount * 5 < topNInfo.othersCount) {
+            // If the "others" bar is going to be 5x the next biggest bar
+            // then don't bother charting this
+            return false;
+        }
+        
+        var topItemsList = topNInfo.topKeysArray;
+        var topItemsObj = {};
+        topItemsList.map(function(val, index) {
+            topItemsObj[val] = true;
+        });
+
+        var newDim = ndx.dimension(function (d) {
+            // Making a dimension and not a `group` because if you read in crossfilter.js the
+            // function add(newValues, newIndex, n0, n1), the line with `while (x1 <= x) {`
+            // then you'll see that the values being grouped have to be naturally ordered.
+            // So the group "other" would include anything that is alphabetically lower than "other".
+            // Calling the alternate group "Zther" would cause it to include everything.
+            var key = d[propName];
+            if (topItemsObj[key])
+                // toString here because `undefined` can cause crossfilter to crash Chrome/FF with out of memory.
+                return "" + key;
+            else
+                return "[...other...]";
+        });
+
+        var chartDiv = createChartDiv(propName);
+        addText(propName, chartDiv, "chartTitle");
+        var group = newDim.group().reduceCount();
+        var rowChart = dc.rowChart(chartDiv);
+        rowChart
+            .width(gfilter.width)
+            .height(gfilter.height)
+            .controlsUseVisibility(true)
+            .dimension(newDim)
+            .group(group)
+            .elasticX(true);
+
+        return true;
+    }
+
     function showColumn() {
         var allowedTypes = ["boolean", "number", "string"];
         var propFirstType = typeof data[0][propName];
@@ -274,6 +353,8 @@ gfilter.init = function (data, rootElement) {
             createRowChart(propName);
         } else if (isDate(data[0][propName])) {
             createDateHistogram(propName);
+        } else if (createRowChartWithOthers(propName, data)) {
+            // success
         } else {
             failedColumns.push(propName);
         }
